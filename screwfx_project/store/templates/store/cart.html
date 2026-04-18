@@ -1,0 +1,260 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito de Compras - ScrewFX</title>
+    <link rel="stylesheet" href="{% static 'store/css/styles.css' %}">
+    <style>
+        .cart-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .cart-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            gap: 20px;
+        }
+        .cart-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+        .cart-item-info {
+            flex: 1;
+        }
+        .cart-item-info h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .cart-item-info p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .cart-item-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .quantity-controls button {
+            width: 35px;
+            height: 35px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .quantity-controls button:hover {
+            background: #f0f0f0;
+        }
+        .quantity-controls span {
+            min-width: 40px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .remove-btn:hover {
+            background: #c82333;
+        }
+        .cart-summary {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-top: 30px;
+        }
+        .cart-summary h3 {
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            font-size: 1.1rem;
+        }
+        .summary-total {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #28a745;
+            border-top: 2px solid #eee;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+        .checkout-btn {
+            width: 100%;
+            padding: 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .checkout-btn:hover {
+            background: #218838;
+        }
+        .empty-cart {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .empty-cart h2 {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .cart-item {
+                flex-direction: column;
+                text-align: center;
+            }
+            .quantity-controls {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'home' %}" class="logo">
+            <img src="{% static 'store/images/logo.png' %}" alt="ScrewFX Logo">
+            <span>ScrewFX</span>
+        </a>
+        <div class="search-bar">
+            <form method="GET" action="{% url 'search_results' %}" style="display: flex; width: 100%;">
+                <input type="text" name="q" placeholder="Buscar productos..." required 
+                    style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px 0 0 4px; outline: none;">
+                <button type="submit" style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 0 4px 4px 0; cursor: pointer;">
+                    Buscar
+                </button>
+            </form>
+        </div>
+        <div class="user-options">
+            <a href="{% url 'cart' %}" class="cart-icon">🛒 <span id="cart-count">{{ cart.get_items_count }}</span></a>
+            {% if user.is_authenticated %}
+                <div class="user-menu">
+                    <span class="user-name">{{ user.username }}</span>
+                    <div class="user-dropdown">
+                        <a href="{% url 'my_orders' %}">Ver Pedidos</a>
+                        <a href="{% url 'logout' %}">Cerrar Sesión</a>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}">Iniciar Sesión / Registrarse</a>
+            {% endif %}
+        </div>
+    </header>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <p class="{{ message.tags|default:'success' }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <div class="cart-container">
+        <div class="cart-header">
+            <h1>Tu Carrito de Compras</h1>
+        </div>
+
+        {% if cart_items %}
+            <div class="cart-items-list">
+                {% for item in cart_items %}
+                <div class="cart-item">
+                    {% if item.product.image %}
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                    {% else %}
+                        <img src="https://via.placeholder.com/100" alt="Sin imagen">
+                    {% endif %}
+                    <div class="cart-item-info">
+                        <h3>{{ item.product.name }}</h3>
+                        <p>{{ item.product.description|truncatewords:15 }}</p>
+                        <p class="cart-item-price">${{ item.product.price }} c/u</p>
+                    </div>
+                    <div class="quantity-controls">
+                        <form method="POST" action="{% url 'update_cart_item' item.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="decrease">
+                            <button type="submit">-</button>
+                        </form>
+                        <span>{{ item.quantity }}</span>
+                        <form method="POST" action="{% url 'update_cart_item' item.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="increase">
+                            <button type="submit">+</button>
+                        </form>
+                    </div>
+                    <div style="text-align: center;">
+                        <p style="font-weight: bold; font-size: 1.1rem; margin-bottom: 10px;">${{ item.get_subtotal }}</p>
+                        <form method="POST" action="{% url 'remove_from_cart' item.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="remove-btn">Eliminar</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="cart-summary">
+                <h3>Resumen del Pedido</h3>
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span>${{ total }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Envío:</span>
+                    <span>Gratis</span>
+                </div>
+                <div class="summary-row summary-total">
+                    <span>Total:</span>
+                    <span>${{ total }}</span>
+                </div>
+                <a href="{% url 'checkout' %}">
+                    <button class="checkout-btn">Proceder al Pago</button>
+                </a>
+            </div>
+        {% else %}
+            <div class="empty-cart">
+                <h2>Tu carrito está vacío</h2>
+                <p>Agrega productos para comenzar a comprar</p>
+                <a href="{% url 'home' %}" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: #28a745; color: white; text-decoration: none; border-radius: 4px;">
+                    Continuar Comprando
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="{% static 'store/js/script.js' %}"></script>
+</body>
+</html>
+

@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eliminar Producto - ScrewFX</title>
+    <link rel="stylesheet" href="{% static 'store/css/admin_styles.css' %}">
+</head>
+<body>
+    <div class="main-container">
+        <h1>¿Eliminar producto "{{ product.name }}"?</h1>
+        <p style="text-align: center;">Esta acción <strong>no se puede deshacer</strong>.</p>
+        
+        <form method="post" style="text-align: center;">
+            {% csrf_token %}
+            <button type="submit" style="background-color: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+                Sí, eliminar
+            </button>
+            <a href="{% url 'product_list' %}" style="display: inline-block; padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px;">
+                Cancelar
+            </a>
+        </form>
+    </div>
+</body>
+</html>

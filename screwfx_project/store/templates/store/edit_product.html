@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Producto - ScrewFX</title>
+    <link rel="stylesheet" href="{% static 'store/css/admin_styles.css' %}">
+</head>
+<body>
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <p class="{{ message.tags|default:'success' }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <div class="main-container">
+        <h1>Editar Producto: {{ product.name }}</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Guardar Cambios</button>
+        </form>
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{% url 'product_list' %}" style="display: inline-block; padding: 10px 20px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px;">Volver a la lista</a>
+        </div>
+    </div>
+</body>
+</html>

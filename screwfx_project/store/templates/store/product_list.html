@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Productos - ScrewFX</title>
+    <link rel="stylesheet" href="{% static 'store/css/admin_styles.css' %}">
+</head>
+<body>
+    <div class="main-container">
+        <h1>Lista de Productos</h1>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <a href="{% url 'add_product' %}" style="display: inline-block; padding: 10px 20px; background-color: #27ae60; color: white; text-decoration: none; border-radius: 4px;">Agregar Nuevo Producto</a>
+        </div>
+        
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <p class="success">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="table-wrapper">
+            <table>
+            <thead>
+            <tr>
+                <th>Imagen</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Categoría</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                    {% else %}
+                        <span>Sin imagen</span>
+                    {% endif %}
+                </td>
+                <td>{{ product.name }}</td>
+                <td>${{ product.price }}</td>
+                <td>{{ product.stock }}</td>
+                <td>{{ product.category.name|default:"Sin categoría" }}</td>
+                <td>
+                    <a href="{% url 'edit_product' product.pk %}" class="edit-button">Editar</a>
+                    <a href="{% url 'delete_product' product.pk %}" class="delete-button">Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No hay productos registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+            </table>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{% url 'admin_menu' %}" style="display: inline-block; padding: 10px 20px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px;">Volver al Menú Admin</a>
+        </div>
+    </div>
+</body>
+</html>

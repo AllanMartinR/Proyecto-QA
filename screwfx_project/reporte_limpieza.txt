@@ -1,0 +1,94 @@
+================================================================================
+REPORTE DE LIMPIEZA — Recuperación de contraseña (flujo antiguo por códigos)
+Proyecto: screwfx_project
+Fecha: 2026-04-17
+================================================================================
+
+RESUMEN
+-------
+- El flujo vigente está en store/urls.py: PasswordResetView con
+  template_name='store/password_reset.html', correo store/password_reset_email.html
+  y confirmación con PasswordResetConfirmView + password_reset_confirm.html.
+- No hay modelos, vistas ni formularios Python que generen/validen códigos numéricos
+  de recuperación; el único rastro del flujo por "código" está en una plantilla
+  HTML huérfana.
+- Se verificó con búsqueda en todo el repositorio: ninguna referencia a
+  'forgot_password.html', 'reset_password.html', ni campos name="code" fuera de
+  esa plantilla.
+
+================================================================================
+1) store/templates/store/forgot_password.html (ELIMINADO — flujo por códigos)
+================================================================================
+
+--- CÓDIGO ORIGINAL (fragmento representativo) ---
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="input-group">
+                    <label for="email">Correo electrónico</label>
+                    <input type="email" id="email" name="email" placeholder="ejemplo@gmail.com" required>
+                </div>
+                <div class="input-group">
+                    <label for="code">Ingresa el código</label>
+                    <input type="number" id="code" name="code" placeholder="123456" required min="100000" max="999999">
+                </div>
+                <a href="{% url 'reset_password' %}" class="btn">Continuar</a>
+                ...
+
+--- CÓDIGO DESPUÉS DE LA LIMPIEZA ---
+
+    (Archivo eliminado por completo — no era referenciado por ninguna vista ni URL
+     en template_name; la ruta 'forgot_password' apunta a password_reset.html.)
+
+--- EXPLICACIÓN ---
+
+    Se eliminó la plantilla porque:
+    - Implementaba la UI del flujo antiguo (correo + código de 6 dígitos).
+    - No está enlazada en store/urls.py ni en store/views.py (código muerto).
+    - El enlace "¿Olvidaste tu contraseña?" usa la URL name 'forgot_password', que
+      renderiza store/password_reset.html, no este archivo.
+
+================================================================================
+2) store/templates/store/reset_password.html (ELIMINADO — plantilla huérfana)
+================================================================================
+
+Nota: esta plantilla no contiene el campo de "código", pero es una pantalla manual
+de "nueva contraseña" sin uid/token de Django, no referenciada en el proyecto y
+duplicada en espíritu por password_reset_confirm.html del flujo actual por enlace.
+
+--- CÓDIGO ORIGINAL (fragmento representativo) ---
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="input-group">
+                    <label for="password">Contraseña nueva</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                </div>
+                <div class="input-group">
+                    <label for="pass_new">Repetir contraseña</label>
+                    <input type="password" id="pass_new" name="pass_new" placeholder="••••••••" required>
+                </div>
+                <a href="{% url 'login' %}" class="btn">Continuar</a>
+                ...
+
+--- CÓDIGO DESPUÉS DE LA LIMPIEZA ---
+
+    (Archivo eliminado — ningún path() ni render() apuntaba a esta plantilla.)
+
+--- EXPLICACIÓN ---
+
+    Código muerto del área de recuperación previo al esquema basado en enlaces
+    de Django; su eliminación no afecta PasswordResetConfirmView ni las URLs
+    nombradas 'reset_password' (que usan password_reset_confirm.html).
+
+================================================================================
+POSIBLE ELIMINACIÓN / REVISIÓN MANUAL (sin cambios aplicados)
+================================================================================
+
+- Ningún otro fragmento quedó marcado como dudoso tras la búsqueda global.
+- store/forms.py: CustomPasswordResetForm y CustomSetPasswordForm están en uso
+  desde store/urls.py — se conservan.
+
+================================================================================
+FIN DEL REPORTE
+================================================================================

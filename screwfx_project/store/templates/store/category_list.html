@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Categorías - ScrewFX</title>
+    <link rel="stylesheet" href="{% static 'store/css/admin_styles.css' %}">
+</head>
+<body>
+    <div class="main-container">
+        <h1>Lista de Categorías</h1>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <a href="{% url 'add_category' %}" style="display: inline-block; padding: 10px 20px; background-color: #27ae60; color: white; text-decoration: none; border-radius: 4px;">Agregar Nueva Categoría</a>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td>{{ category.name }}</td>
+                        <td>{{ category.description|default:"Sin descripción" }}</td>
+                        <td>
+                            <a href="{% url 'edit_category' category.pk %}" class="edit-button">Editar</a>
+                            <a href="{% url 'delete_category' category.pk %}" class="delete-button">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" style="text-align: center;">No hay categorías registradas.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{% url 'admin_menu' %}" style="display: inline-block; padding: 10px 20px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px;">Volver al Menú Admin</a>
+        </div>
+    </div>
+</body>
+</html>

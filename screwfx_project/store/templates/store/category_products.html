@@ -1,0 +1,119 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category.name }} - ScrewFX</title>
+    <link rel="stylesheet" href="{% static 'store/css/admin_styles.css' %}">
+    <style>
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        @media (max-width: 768px) {
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                padding: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .product-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            background-color: white;
+            transition: transform 0.2s;
+        }
+        .product-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .product-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .product-item h3 {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .product-item p {
+            color: #e74c3c;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .product-item a {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .product-item a:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div style="max-width: 1400px; margin: 0 auto; padding: 20px; width: 100%; box-sizing: border-box;">
+        <h1>Productos en {{ category.name }}</h1>
+        
+        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 30px;">
+            <h3 style="margin-top: 0; margin-bottom: 15px;">Filtrar por Precio</h3>
+            <form method="GET" style="display: flex; gap: 15px; align-items: end; flex-wrap: wrap;">
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label style="font-weight: bold; font-size: 0.9rem;">Precio Mínimo</label>
+                    <input type="number" name="price_min" step="0.01" placeholder="0.00" value="{{ request.GET.price_min }}" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label style="font-weight: bold; font-size: 0.9rem;">Precio Máximo</label>
+                    <input type="number" name="price_max" step="0.01" placeholder="9999.99" value="{{ request.GET.price_max }}" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label style="font-weight: bold; font-size: 0.9rem;">Ordenar por</label>
+                    <select name="sort" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="name" {% if request.GET.sort == 'name' %}selected{% endif %}>Nombre</option>
+                        <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>Precio: Menor a Mayor</option>
+                        <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>Precio: Mayor a Menor</option>
+                    </select>
+                </div>
+                <button type="submit" style="padding: 8px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Filtrar</button>
+                <a href="{% url 'category_products' category.id %}" style="padding: 8px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; display: inline-block;">Limpiar</a>
+            </form>
+        </div>
+        
+        {% if products %}
+            <div class="product-grid">
+                {% for product in products %}
+                <div class="product-item">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" onerror="this.src='https://via.placeholder.com/200';">
+                    <h3>{{ product.name }}</h3>
+                    <p>${{ product.price }}</p>
+                    <a href="{% url 'product_detail' product_id=product.id %}">Ver Detalles</a>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="text-align: center;">No hay productos en esta categoría con los filtros seleccionados.</p>
+        {% endif %}
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{% url 'admin_menu' %}" style="display: inline-block; padding: 10px 20px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px;">Volver al Menú Administrativo</a>
+        </div>
+    </div>
+</body>
+</html>

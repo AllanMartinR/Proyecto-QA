@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú Administrativo - ScrewFX</title>
+    <link rel="stylesheet" href="{% static 'store/css/admin_styles.css' %}">
+</head>
+<body>
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <p class="{{ message.tags|default:'success' }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <div class="main-container">
+        <h1>Menú Administrativo</h1>
+        <ul>
+            <li><a href="{% url 'add_product' %}">Agregar Producto</a></li>
+            <li><a href="{% url 'product_list' %}">Lista de Productos</a></li>
+            <li><a href="{% url 'add_category' %}">Agregar Categoría</a></li>
+            <li><a href="{% url 'category_list' %}">Lista de Categorías</a></li>
+            <li><a href="{% url 'user_list' %}">Gestionar Usuarios</a></li>
+            <!-- O dinámicamente con categorías existentes -->
+            {% for category in categories %}
+                <li><a href="{% url 'category_products' category_id=category.id %}">{{ category.name }}</a></li>
+            {% empty %}
+                <li>No hay categorías disponibles.</li>
+            {% endfor %}
+            <li><a href="{% url 'logout' %}">Cerrar Sesión</a></li>
+        </ul>
+    </div>
+</body>
+</html>

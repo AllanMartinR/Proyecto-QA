@@ -1,0 +1,173 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguimiento de Pedido - ScrewFX</title>
+    <link rel="stylesheet" href="{% static 'store/css/styles.css' %}">
+    <style>
+        .tracking-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .tracking-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .status-timeline {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .status-step {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-left: 3px solid #ddd;
+            margin-left: 20px;
+            position: relative;
+        }
+        .status-step.active {
+            border-left-color: #28a745;
+        }
+        .status-step.completed {
+            border-left-color: #28a745;
+        }
+        .status-step::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #ddd;
+        }
+        .status-step.active::before {
+            background: #28a745;
+            box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.2);
+        }
+        .status-step.completed::before {
+            background: #28a745;
+        }
+        .status-info {
+            margin-left: 30px;
+        }
+        .status-info h3 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        .status-info p {
+            margin: 0;
+            color: #666;
+        }
+        .order-details {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'home' %}" class="logo">
+            <img src="{% static 'store/images/logo.png' %}" alt="ScrewFX Logo">
+            <span>ScrewFX</span>
+        </a>
+        <div class="search-bar">
+            <form method="GET" action="{% url 'search_results' %}" style="display: flex; width: 100%;">
+                <input type="text" name="q" placeholder="Buscar productos..." required 
+                    style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px 0 0 4px; outline: none;">
+                <button type="submit" style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 0 4px 4px 0; cursor: pointer;">
+                    Buscar
+                </button>
+            </form>
+        </div>
+        <div class="user-options">
+            <a href="{% url 'cart' %}" class="cart-icon">🛒</a>
+            {% if user.is_authenticated %}
+                <div class="user-menu">
+                    <span class="user-name">{{ user.username }}</span>
+                    <div class="user-dropdown">
+                        <a href="{% url 'my_orders' %}">Ver Pedidos</a>
+                        <a href="{% url 'logout' %}">Cerrar Sesión</a>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}">Iniciar Sesión</a>
+            {% endif %}
+        </div>
+    </header>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <p class="{{ message.tags|default:'success' }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="tracking-container">
+        <div class="tracking-header">
+            <h1>Seguimiento de Pedido</h1>
+            <p><strong>Número de Pedido:</strong> <span id="pedido-numero">{{ pedido.numero_pedido }}</span></p>
+        </div>
+
+        <div class="status-timeline" id="status-timeline">
+            {% for estado_code, estado_display in estados %}
+                <div class="status-step {% if pedido.estado == estado_code %}active{% elif current_index > forloop.counter0 %}completed{% endif %}" id="status-{{ estado_code }}">
+                    <div class="status-info">
+                        <h3>{{ estado_display }}</h3>
+                        <p id="status-{{ estado_code }}-time"></p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="order-details">
+            <h3>Detalles del Pedido</h3>
+            <p><strong>Total:</strong> ${{ pedido.total }}</p>
+            <p><strong>Estado Actual:</strong> <span id="current-status">{{ pedido.get_estado_display }}</span></p>
+            <p><strong>Fecha:</strong> {{ pedido.created_at|date:"d/m/Y H:i" }}</p>
+        </div>
+    </div>
+
+    <script>
+        const pedidoId = {{ pedido.id }};
+        const estados = ['pendiente', 'confirmado', 'preparando', 'enviado', 'en_transito', 'entregado'];
+        
+        function updateStatus() {
+            fetch(`/update-tracking/${pedidoId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('pedido-numero').textContent = data.numero_pedido;
+                    document.getElementById('current-status').textContent = data.estado_display;
+                    
+                    estados.forEach((estado, index) => {
+                        const step = document.getElementById(`status-${estado}`);
+                        if (step) {
+                            const currentIndex = estados.indexOf(data.estado);
+                            
+                            step.classList.remove('active', 'completed');
+                            if (index < currentIndex) {
+                                step.classList.add('completed');
+                            } else if (index === currentIndex) {
+                                step.classList.add('active');
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+        
+        updateStatus();
+        setInterval(updateStatus, 30000); // Actualizar cada 30 segundos
+    </script>
+    <script src="{% static 'store/js/script.js' %}"></script>
+</body>
+</html>
+

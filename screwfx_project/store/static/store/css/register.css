@@ -1,0 +1,262 @@
+/* Fancy responsive styling */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(180deg, #E89584 0%, #2F5A6B 125%);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px;
+}
+
+/* Contenedor principal centrado */
+.left-frame {
+  width: 100%;
+  max-width: 500px;
+  background: linear-gradient(180deg, #4F1521 0%, #1C2545 180%);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Contenedor principal dentro del frame */
+.container {
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  animation: fadeIn 1s ease;
+}
+
+.card {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  padding: 2rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: slideUp 0.8s ease;
+}
+
+label {
+  text-align: left;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+input {
+  padding: 0.7rem;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+  font-size: 1rem;
+  transition: box-shadow 0.3s ease;
+}
+
+input:focus {
+  box-shadow: 0 0 8px rgba(255,106,0,0.6);
+}
+
+.btn {
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  background: #ff6a00;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.btn:hover {
+  background: #ff4500;
+  transform: translateY(-2px);
+}
+
+.logout {
+  margin-top: 1rem;
+  background: #ff3366;
+}
+
+.logout:hover {
+  background: #cc2952;
+}
+
+.error {
+  color: #ffdede;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  margin: 1rem 0;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+}
+
+.input-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.input-group input {
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.2); /* fondo blanco semitransparente */
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+/* Al hacer foco: efecto de brillo */
+.input-group input:focus {
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
+/* Color del texto placeholder */
+.input-group input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.links {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.link {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+
+.link:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* Estilos para mensajes como pop-ups en páginas de autenticación */
+.messages {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.messages p {
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  font-weight: 500;
+  animation: slideInRight 0.3s ease-out;
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  position: relative;
+  min-width: 300px;
+}
+
+.messages .success {
+  background-color: #28a745;
+  color: white;
+  border-left: 4px solid #218838;
+}
+
+.messages .error {
+  background-color: #dc3545;
+  color: white;
+  border-left: 4px solid #c82333;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .left-frame {
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .container {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 10px;
+  }
+  
+  .left-frame {
+    padding: 1rem;
+  }
+  
+  .title {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  
+  .input-group {
+    margin-bottom: 1rem;
+  }
+}

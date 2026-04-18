@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Categoría - ScrewFX</title>
+    <link rel="stylesheet" href="{% static 'store/css/admin_styles.css' %}">
+</head>
+<body>
+    <div class="main-container">
+        <h1>Editar Categoría: {{ category.name }}</h1>
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <p class="success">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            {% if category.image %}
+                <div style="margin: 15px 0;">
+                    <label>Imagen actual:</label>
+                    <img src="{{ category.image.url }}" alt="{{ category.name }}" style="max-width: 200px; height: auto; border-radius: 4px; margin-top: 10px; display: block;">
+                </div>
+            {% endif %}
+            <button type="submit">Guardar Cambios</button>
+        </form>
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{% url 'category_list' %}" style="display: inline-block; padding: 10px 20px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px;">Volver a la lista</a>
+        </div>
+    </div>
+</body>
+</html>

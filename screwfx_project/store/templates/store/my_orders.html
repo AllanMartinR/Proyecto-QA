@@ -1,0 +1,122 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Pedidos - ScrewFX</title>
+    <link rel="stylesheet" href="{% static 'store/css/styles.css' %}">
+    <style>
+        .orders-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .orders-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .order-card {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .order-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .order-status {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .status-pendiente { background: #ffc107; color: #000; }
+        .status-confirmado { background: #17a2b8; color: #fff; }
+        .status-preparando { background: #007bff; color: #fff; }
+        .status-enviado { background: #6c757d; color: #fff; }
+        .status-en_transito { background: #fd7e14; color: #fff; }
+        .status-entregado { background: #28a745; color: #fff; }
+        .empty-orders {
+            text-align: center;
+            padding: 60px 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'home' %}" class="logo">
+            <img src="{% static 'store/images/logo.png' %}" alt="ScrewFX Logo">
+            <span>ScrewFX</span>
+        </a>
+        <div class="search-bar">
+            <form method="GET" action="{% url 'search_results' %}" style="display: flex; width: 100%;">
+                <input type="text" name="q" placeholder="Buscar productos..." required 
+                    style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px 0 0 4px; outline: none;">
+                <button type="submit" style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 0 4px 4px 0; cursor: pointer;">
+                    Buscar
+                </button>
+            </form>
+        </div>
+        <div class="user-options">
+            <a href="{% url 'cart' %}" class="cart-icon">🛒</a>
+            {% if user.is_authenticated %}
+                <div class="user-menu">
+                    <span class="user-name">{{ user.username }}</span>
+                    <div class="user-dropdown">
+                        <a href="{% url 'my_orders' %}">Ver Pedidos</a>
+                        <a href="{% url 'logout' %}">Cerrar Sesión</a>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}">Iniciar Sesión</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="orders-container">
+        <div class="orders-header">
+            <h1>Mis Pedidos</h1>
+        </div>
+
+        {% if pedidos %}
+            {% for pedido in pedidos %}
+            <div class="order-card" onclick="window.location.href='{% url 'tracking' pedido.id %}'">
+                <div class="order-header">
+                    <div>
+                        <h3>Pedido #{{ pedido.numero_pedido }}</h3>
+                        <p style="color: #666; margin: 5px 0;">Fecha: {{ pedido.created_at|date:"d/m/Y H:i" }}</p>
+                    </div>
+                    <div>
+                        <span class="order-status status-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span>
+                        <p style="text-align: right; margin-top: 10px; font-size: 1.2rem; font-weight: bold; color: #28a745;">
+                            ${{ pedido.total }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-orders">
+                <h2>No tienes pedidos aún</h2>
+                <a href="{% url 'home' %}" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: #28a745; color: white; text-decoration: none; border-radius: 4px;">
+                    Comenzar a Comprar
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="{% static 'store/js/script.js' %}"></script>
+</body>
+</html>
+

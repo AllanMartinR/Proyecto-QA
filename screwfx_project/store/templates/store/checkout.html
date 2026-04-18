@@ -1,0 +1,223 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - ScrewFX</title>
+    <link rel="stylesheet" href="{% static 'store/css/styles.css' %}">
+    <style>
+        .checkout-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+        .checkout-form {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .checkout-form h2 {
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #28a745;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .order-summary {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+        .order-summary h3 {
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        .order-total {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #28a745;
+            border-top: 2px solid #eee;
+            padding-top: 15px;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .submit-btn:hover {
+            background: #218838;
+        }
+        @media (max-width: 768px) {
+            .checkout-container {
+                grid-template-columns: 1fr;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'home' %}" class="logo">
+            <img src="{% static 'store/images/logo.png' %}" alt="ScrewFX Logo">
+            <span>ScrewFX</span>
+        </a>
+        <div class="search-bar">
+            <form method="GET" action="{% url 'search_results' %}" style="display: flex; width: 100%;">
+                <input type="text" name="q" placeholder="Buscar productos..." required 
+                    style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px 0 0 4px; outline: none;">
+                <button type="submit" style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 0 4px 4px 0; cursor: pointer;">
+                    Buscar
+                </button>
+            </form>
+        </div>
+        <div class="user-options">
+            <a href="{% url 'cart' %}" class="cart-icon">🛒 <span id="cart-count">{{ cart.get_items_count }}</span></a>
+            {% if user.is_authenticated %}
+                <div class="user-menu">
+                    <span class="user-name">{{ user.username }}</span>
+                    <div class="user-dropdown">
+                        <a href="{% url 'my_orders' %}">Ver Pedidos</a>
+                        <a href="{% url 'logout' %}">Cerrar Sesión</a>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}">Iniciar Sesión / Registrarse</a>
+            {% endif %}
+        </div>
+    </header>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <p class="{{ message.tags|default:'success' }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="checkout-container">
+        <div class="checkout-form">
+            <h2>Información de Pago</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="nombre_completo">Nombre Completo *</label>
+                    <input type="text" id="nombre_completo" name="nombre_completo" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Correo Electrónico *</label>
+                    <input type="email" id="email" name="email" value="{{ user.email }}" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="telefono">Teléfono *</label>
+                        <input type="tel" id="telefono" name="telefono" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="codigo_postal">Código Postal *</label>
+                        <input type="text" id="codigo_postal" name="codigo_postal" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="direccion">Dirección de Envío *</label>
+                    <textarea id="direccion" name="direccion" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="ciudad">Ciudad *</label>
+                    <input type="text" id="ciudad" name="ciudad" required>
+                </div>
+                <h3 style="margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px;">Información de Tarjeta</h3>
+                <div class="form-group">
+                    <label for="numero_tarjeta">Número de Tarjeta *</label>
+                    <input type="text" id="numero_tarjeta" name="numero_tarjeta" maxlength="16" placeholder="1234 5678 9012 3456" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fecha_expiracion">Fecha de Expiración *</label>
+                        <input type="text" id="fecha_expiracion" name="fecha_expiracion" maxlength="5" placeholder="MM/AA" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cvv">CVV *</label>
+                        <input type="text" id="cvv" name="cvv" maxlength="3" placeholder="123" required>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn">Confirmar Pago</button>
+            </form>
+        </div>
+
+        <div class="order-summary">
+            <h3>Resumen del Pedido</h3>
+            {% for item in cart_items %}
+            <div class="order-item">
+                <div>
+                    <strong>{{ item.product.name }}</strong>
+                    <p style="margin: 5px 0; color: #666;">Cantidad: {{ item.quantity }}</p>
+                </div>
+                <div style="font-weight: bold;">${{ item.get_subtotal }}</div>
+            </div>
+            {% endfor %}
+            <div class="order-total">
+                <span>Total:</span>
+                <span>${{ total }}</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'store/js/script.js' %}"></script>
+</body>
+</html>
+

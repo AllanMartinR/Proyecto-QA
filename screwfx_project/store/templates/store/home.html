@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScrewFX</title>
+    <link rel="stylesheet" href="{% static 'store/css/styles.css' %}">
+</head>
+<body>
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <p class="{{ message.tags|default:'success' }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <header>
+        <a href="{% url 'home' %}" class="logo">
+            <img src="{% static 'store/images/logo.png' %}" alt="ScrewFX Logo">
+            <span>ScrewFX</span>
+        </a>
+        <div class="search-bar">
+    		<form method="GET" action="{% url 'search_results' %}" style="display: flex; width: 100%;">
+        		<input type="text" name="q" placeholder="Buscar productos..." required 
+               		style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px 0 0 4px; outline: none;">
+        		<button type="submit" style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 0 4px 4px 0; cursor: pointer;">
+            		Buscar
+        		</button>
+    		</form>
+		</div>
+		
+        <div class="user-options">
+            <a href="{% url 'cart' %}" class="cart-icon">🛒 <span id="cart-count">{% if cart %}{{ cart.get_items_count }}{% else %}0{% endif %}</span></a>
+            {% if user.is_authenticated %}
+                <div class="user-menu">
+                    <span class="user-name">{{ user.username }}</span>
+                    <div class="user-dropdown">
+                        <a href="{% url 'my_orders' %}">Ver Pedidos</a>
+                        <a href="{% url 'logout' %}">Cerrar Sesión</a>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}">Iniciar Sesión / Registrarse</a>
+            {% endif %}
+        </div>
+    </header>
+    <section class="banner">
+        <img src="{% static 'store/images/paredherramientas.png' %}" alt="Herramientas en exhibición">
+    </section>
+
+    <section class="featured-products">
+        <h2 style="text-align: center; grid-column: 1 / -1; margin-bottom: 20px; font-size: 2rem;">Productos Destacados</h2>
+        {% if featured_products %}
+            {% for product in featured_products %}
+            <div class="product">
+                <a href="{% url 'product_detail' product_id=product.id %}" style="text-decoration: none; color: inherit;">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" onerror="this.src='https://via.placeholder.com/150';">
+                    {% else %}
+                        <img src="https://via.placeholder.com/150" alt="Sin imagen">
+                    {% endif %}
+                    <p><strong>{{ product.name }}</strong></p>
+                    <div class="rating">★★★★☆</div>
+                    <p><strong>${{ product.price }}</strong></p>
+                </a>
+                {% if user.is_authenticated %}
+                <form method="POST" action="{% url 'add_to_cart' product.id %}" style="margin-top: 10px;">
+                    {% csrf_token %}
+                    <button type="submit" class="add-to-cart">Añadir al carrito</button>
+                </form>
+                {% else %}
+                <a href="{% url 'login' %}" class="add-to-cart" style="display: inline-block; text-align: center; text-decoration: none; margin-top: 10px;">Inicia sesión para comprar</a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align: center; grid-column: 1 / -1;">No hay productos disponibles.</p>
+        {% endif %}
+    </section>
+
+    <section class="categories-section">
+        <h2 style="text-align: center; margin-bottom: 30px; font-size: 2rem;">Categorías</h2>
+        <div class="categories-wrapper">
+            <button class="category-scroll-btn category-scroll-left" onclick="scrollCategories('left')">‹</button>
+            <div class="categories-scroll" id="categoriesScroll">
+                {% if categories %}
+                    {% for category in categories %}
+                    <div class="category">
+                        <a href="{% url 'user_category_products' category.id %}" style="text-decoration: none; color: inherit;">
+                            <h2>{{ category.name }}</h2>
+                            {% if category.image %}
+                                <img src="{{ category.image.url }}" alt="{{ category.name }}">
+                            {% else %}
+                                <img src="https://via.placeholder.com/200" alt="{{ category.name }}">
+                            {% endif %}
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="text-align: center; width: 100%;">No hay categorías disponibles.</p>
+                {% endif %}
+            </div>
+            <button class="category-scroll-btn category-scroll-right" onclick="scrollCategories('right')">›</button>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-section">
+            <h3>¿Quiénes Somos?</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
+            <p><strong>Sobre nosotros</strong></p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Morbi finibus, nisi at tincidunt tincidunt, mauris nunc tincidunt nisi, id tincidunt nisi nisi at nisi.</p>
+        </div>
+        <div class="footer-section">
+            <h3>Contacto</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <p>Tel: +123 456 789</p>
+            <p>Email: contacto@screwfx.com</p>
+        </div>
+        <div class="footer-section">
+            <h3>Términos legales y privacidad</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</p>
+            <p><strong>Términos y condiciones</strong></p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Morbi finibus, nisi at tincidunt tincidunt, mauris nunc tincidunt nisi.</p>
+            <p><strong>Política de privacidad</strong></p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.</p>
+        </div>
+    </footer>
+
+    <script>
+        function scrollCategories(direction) {
+            const scrollContainer = document.getElementById('categoriesScroll');
+            const scrollAmount = 300;
+            if (direction === 'left') {
+                scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            } else {
+                scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
+        }
+    </script>
+    <script src="{% static 'store/js/script.js' %}"></script>
+</body>
+</html>
