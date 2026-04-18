@@ -4,15 +4,16 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 import uuid
-from django.db.models import Count, Q
+from django.db.models import Count, DecimalField, ExpressionWrapper, F, Q
 import random
 from store.models import CustomUser, Product, Category, Cart, CartItem, Pedido, PedidoItem, PEDIDO_ESTADOS
 import logging
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import ProductForm, CategoryForm
+from .reports_pdf import build_sales_report_pdf_bytes
 from django.contrib.auth import logout as auth_logout
 from datetime import datetime, timedelta
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 
 logger = logging.getLogger(__name__)
 
@@ -150,8 +151,45 @@ def add_product(request):
 @login_required
 @user_passes_test(is_admin)
 def product_list(request):
-    products = Product.objects.all()
-    return render(request, 'store/product_list.html', {'products': products})
+    products = Product.objects.select_related("category").annotate(
+        inventory_value=ExpressionWrapper(
+            F("price") * F("stock"),
+            output_field=DecimalField(max_digits=14, decimal_places=2),
+        )
+    )
+    busqueda = request.GET.get("q", "").strip()
+    categoria_filtro = request.GET.get("category", "")
+    orden = request.GET.get("sort", "name")
+
+    if busqueda:
+        products = products.filter(
+            Q(name__icontains=busqueda) | Q(description__icontains=busqueda)
+        )
+
+    if categoria_filtro == "none":
+        products = products.filter(category__isnull=True)
+    elif categoria_filtro.isdigit():
+        products = products.filter(category_id=int(categoria_filtro))
+
+    if orden == "price_asc":
+        products = products.order_by("price", "name")
+    elif orden == "price_desc":
+        products = products.order_by("-price", "name")
+    else:
+        products = products.order_by("name")
+
+    categories = Category.objects.all().order_by("name")
+    return render(
+        request,
+        "store/product_list.html",
+        {
+            "products": products,
+            "categories": categories,
+            "busqueda": busqueda,
+            "categoria_filtro": categoria_filtro,
+            "orden": orden,
+        },
+    )
 
 @login_required
 @user_passes_test(is_admin)
@@ -323,8 +361,36 @@ def product_detail(request, product_id):
 @login_required
 @user_passes_test(is_admin)
 def admin_menu(request):
-    categories = Category.objects.all()
-    return render(request, 'store/admin_menu.html', {'categories': categories})
+    return render(request, "store/admin_menu.html")
+
+
+@login_required
+@user_passes_test(is_admin)
+def sales_report(request):
+    categories = Category.objects.all().order_by("name")
+    return render(request, "store/sales_report.html", {"categories": categories})
+
+
+@login_required
+@user_passes_test(is_admin)
+def sales_report_pdf(request):
+    raw = request.GET.get("category", "all")
+    if raw == "all":
+        category_id = None
+    else:
+        try:
+            category_id = int(raw)
+        except (TypeError, ValueError):
+            messages.error(request, "Selección de categoría no válida.")
+            return redirect("sales_report")
+        if not Category.objects.filter(pk=category_id).exists():
+            messages.error(request, "La categoría indicada no existe.")
+            return redirect("sales_report")
+
+    pdf_bytes = build_sales_report_pdf_bytes(category_id)
+    response = HttpResponse(pdf_bytes, content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="reporte_ventas_ScrewFX.pdf"'
+    return response
 
 # Funciones auxiliares para el carrito
 def get_or_create_cart(user):

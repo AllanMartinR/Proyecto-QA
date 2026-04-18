@@ -15,22 +15,39 @@
             {% endfor %}
         </div>
     {% endif %}
-    <div class="main-container">
-        <h1>Menú Administrativo</h1>
-        <ul>
-            <li><a href="{% url 'add_product' %}">Agregar Producto</a></li>
-            <li><a href="{% url 'product_list' %}">Lista de Productos</a></li>
-            <li><a href="{% url 'add_category' %}">Agregar Categoría</a></li>
-            <li><a href="{% url 'category_list' %}">Lista de Categorías</a></li>
-            <li><a href="{% url 'user_list' %}">Gestionar Usuarios</a></li>
-            <!-- O dinámicamente con categorías existentes -->
-            {% for category in categories %}
-                <li><a href="{% url 'category_products' category_id=category.id %}">{{ category.name }}</a></li>
-            {% empty %}
-                <li>No hay categorías disponibles.</li>
-            {% endfor %}
-            <li><a href="{% url 'logout' %}">Cerrar Sesión</a></li>
-        </ul>
+    <div class="main-container admin-menu-page">
+        <h1>Menú administrativo</h1>
+        <p class="admin-menu-subtitle">Selecciona una opción</p>
+        <nav class="admin-menu-grid" aria-label="Opciones de administración">
+            <a class="admin-menu-card" href="{% url 'add_product' %}">
+                <span class="admin-menu-card-title">Agregar producto</span>
+                <span class="admin-menu-card-hint">Alta de artículos en el catálogo</span>
+            </a>
+            <a class="admin-menu-card" href="{% url 'product_list' %}">
+                <span class="admin-menu-card-title">Lista de productos</span>
+                <span class="admin-menu-card-hint">Consultar, editar o eliminar</span>
+            </a>
+            <a class="admin-menu-card" href="{% url 'add_category' %}">
+                <span class="admin-menu-card-title">Agregar categoría</span>
+                <span class="admin-menu-card-hint">Nuevas secciones del catálogo</span>
+            </a>
+            <a class="admin-menu-card" href="{% url 'category_list' %}">
+                <span class="admin-menu-card-title">Lista de categorías</span>
+                <span class="admin-menu-card-hint">Gestionar categorías existentes</span>
+            </a>
+            <a class="admin-menu-card" href="{% url 'user_list' %}">
+                <span class="admin-menu-card-title">Gestionar usuarios</span>
+                <span class="admin-menu-card-hint">Cuentas registradas</span>
+            </a>
+            <a class="admin-menu-card admin-menu-card--accent" href="{% url 'sales_report' %}">
+                <span class="admin-menu-card-title">Generar reportes</span>
+                <span class="admin-menu-card-hint">Ventas e ingresos en PDF</span>
+            </a>
+            <a class="admin-menu-card admin-menu-card--logout" href="{% url 'logout' %}">
+                <span class="admin-menu-card-title">Cerrar sesión</span>
+                <span class="admin-menu-card-hint">Salir del panel</span>
+            </a>
+        </nav>
     </div>
 </body>
 </html>
