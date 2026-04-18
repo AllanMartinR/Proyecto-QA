@@ -1,0 +1,87 @@
+================================================================================
+REPORTE DE CAMBIOS — MENÚ ADMINISTRADOR, LIMPIEZA Y MÓDULO DE REPORTES (PDF)
+Proyecto: ScrewFX (Django)
+================================================================================
+
+NOTA DE VERIFICACIÓN (NO ELIMINAR SIN REVISAR)
+--------------------------------------------------------------------------------
+La vista y URL `category_products` y la plantilla `category_products.html` se
+mantienen: siguen usándose en `product_detail.html` (enlace "Volver" para staff)
+y en la propia plantilla de categoría. Solo se elimina del menú admin el bucle
+que listaba categorías como accesos directos.
+
+
+================================================================================
+1) CÓDIGO ORIGINAL (FRAGMENTOS RELEVANTES)
+================================================================================
+
+--- admin_menu.html ---
+<ul>
+    <li><a href="{% url 'add_product' %}">Agregar Producto</a></li>
+    ...
+    {% for category in categories %}
+        <li><a href="{% url 'category_products' category_id=category.id %}">{{ category.name }}</a></li>
+    {% empty %}
+        <li>No hay categorías disponibles.</li>
+    {% endfor %}
+    <li><a href="{% url 'logout' %}">Cerrar Sesión</a></li>
+</ul>
+
+--- views.py (admin_menu) ---
+def admin_menu(request):
+    categories = Category.objects.all()
+    return render(request, 'store/admin_menu.html', {'categories': categories})
+
+--- urls.py ---
+No existían rutas panel/reportes/ ni módulo reports_pdf.
+
+--- requirements.txt ---
+Sin dependencia reportlab.
+
+
+================================================================================
+2) CÓDIGO MODIFICADO (RESUMEN DE ARCHIVOS)
+================================================================================
+
+- admin_menu.html: rejilla de tarjetas (.admin-menu-grid), sin bucle de
+  categorías; enlace "Generar reportes" → sales_report.
+
+- admin_styles.css: bloques CSS al final para tarjetas del menú y página de
+  reportes (grid responsivo).
+
+- views.py: admin_menu sin contexto categories; vistas sales_report y
+  sales_report_pdf; import HttpResponse y build_sales_report_pdf_bytes.
+
+- urls.py: path('panel/reportes/', ...) y path('panel/reportes/pdf/', ...).
+  (Prefijo panel/ para no colisionar con django.contrib.admin en /admin/.)
+
+- store/reports_pdf.py: nuevo — armado del PDF con ReportLab (ventas, ingresos,
+  unidades, filtro, fecha, desglose por categoría si aplica, inventario stock×precio).
+
+- store/templates/store/sales_report.html: nuevo — formulario categoría/todas
+  y descarga PDF por GET.
+
+- requirements.txt: reportlab==4.4.2
+
+
+================================================================================
+3) EXPLICACIÓN
+================================================================================
+
+Eliminado (solo del menú admin):
+  Bucle {% for category in categories %} y la consulta Category.objects.all()
+  en admin_menu.
+
+Modificado (UI):
+  Menú de lista vertical a tarjetas responsivas (CSS Grid).
+
+Agregado:
+  Módulo de reportes monetarios en PDF con filtro por categoría o todas.
+
+Rutas de reportes (evitan colisión con django.contrib.admin en /admin/):
+  /panel/reportes/  y  /panel/reportes/pdf/?category=all|ID
+
+
+================================================================================
+FIN DEL REPORTE
+================================================================================

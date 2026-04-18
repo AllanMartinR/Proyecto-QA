@@ -8,12 +8,13 @@
     <link rel="stylesheet" href="{% static 'store/css/admin_styles.css' %}">
 </head>
 <body>
-    <div class="main-container">
-        <h1>Lista de Productos</h1>
-        <div style="text-align: center; margin-bottom: 20px;">
-            <a href="{% url 'add_product' %}" style="display: inline-block; padding: 10px 20px; background-color: #27ae60; color: white; text-decoration: none; border-radius: 4px;">Agregar Nuevo Producto</a>
+    <div class="main-container product-list-page">
+        <h1>Lista de productos</h1>
+        <div class="product-list-actions-top">
+            <a href="{% url 'admin_menu' %}" class="btn-admin-menu">Menú administrador</a>
+            <a href="{% url 'add_product' %}" class="btn-add-product">Agregar nuevo producto</a>
         </div>
-        
+
         {% if messages %}
             <div class="messages">
                 {% for message in messages %}
@@ -21,6 +22,37 @@
                 {% endfor %}
             </div>
         {% endif %}
+
+        <form method="get" action="{% url 'product_list' %}" class="product-list-filters">
+            <div class="product-list-filters-row">
+                <label class="product-list-filter-field product-list-filter-grow">
+                    <span class="product-list-filter-label">Buscar</span>
+                    <input type="search" name="q" value="{{ busqueda }}" placeholder="Nombre o descripción…" autocomplete="off">
+                </label>
+                <label class="product-list-filter-field">
+                    <span class="product-list-filter-label">Categoría</span>
+                    <select name="category">
+                        <option value="" {% if categoria_filtro == "" %}selected{% endif %}>Todas</option>
+                        <option value="none" {% if categoria_filtro == "none" %}selected{% endif %}>Sin categoría</option>
+                        {% for c in categories %}
+                            <option value="{{ c.id }}" {% if categoria_filtro == c.id|stringformat:"d" %}selected{% endif %}>{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label class="product-list-filter-field">
+                    <span class="product-list-filter-label">Ordenar</span>
+                    <select name="sort">
+                        <option value="name" {% if orden == "name" %}selected{% endif %}>Alfabético (A–Z)</option>
+                        <option value="price_asc" {% if orden == "price_asc" %}selected{% endif %}>Precio: menor a mayor</option>
+                        <option value="price_desc" {% if orden == "price_desc" %}selected{% endif %}>Precio: mayor a menor</option>
+                    </select>
+                </label>
+            </div>
+            <div class="product-list-filters-actions">
+                <button type="submit" class="btn-filter-apply">Aplicar filtros</button>
+                <a href="{% url 'product_list' %}" class="btn-filter-clear">Limpiar</a>
+            </div>
+        </form>
 
         <div class="table-wrapper">
             <table>
@@ -30,6 +62,7 @@
                 <th>Nombre</th>
                 <th>Precio</th>
                 <th>Stock</th>
+                <th>Valor inventario</th>
                 <th>Categoría</th>
                 <th>Acciones</th>
             </tr>
@@ -39,7 +72,7 @@
             <tr>
                 <td>
                     {% if product.image %}
-                        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-list-thumb">
                     {% else %}
                         <span>Sin imagen</span>
                     {% endif %}
@@ -47,6 +80,7 @@
                 <td>{{ product.name }}</td>
                 <td>${{ product.price }}</td>
                 <td>{{ product.stock }}</td>
+                <td>${{ product.inventory_value|floatformat:2 }}</td>
                 <td>{{ product.category.name|default:"Sin categoría" }}</td>
                 <td>
                     <a href="{% url 'edit_product' product.pk %}" class="edit-button">Editar</a>
@@ -55,15 +89,15 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="6">No hay productos registrados.</td>
+                <td colspan="7">No hay productos que coincidan con los filtros.</td>
             </tr>
             {% endfor %}
         </tbody>
             </table>
         </div>
 
-        <div style="text-align: center; margin-top: 20px;">
-            <a href="{% url 'admin_menu' %}" style="display: inline-block; padding: 10px 20px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px;">Volver al Menú Admin</a>
+        <div class="product-list-footer-nav">
+            <a href="{% url 'admin_menu' %}" class="btn-back-admin">Volver al menú admin</a>
         </div>
     </div>
 </body>
